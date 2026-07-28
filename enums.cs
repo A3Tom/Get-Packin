@@ -5,6 +5,6 @@ public enum Piece
     BLUE,
     WHITE,
     BLACK,
-    PURPLE,
+    YELLOW,
     PINK
 }
