@@ -56,7 +56,7 @@ static void printPieces(Dictionary<Piece, ulong> pieces)
         var rotPiece = piece.Value;
         for (int i = 0; i < 3; i++)
         {
-            rotPiece = counterRotatePiece(rotPiece);
+            rotPiece = rotatePiece(rotPiece);
             Console.WriteLine($"\n ~ Rotated {i + 1}");
             printPiece(piece.Key, rotPiece);
         }
@@ -84,7 +84,7 @@ static void printPiece(Piece piece, ulong pieceBlocks)
     }
 }
 
-static ulong counterRotatePiece(ulong pieceBlocks)
+static ulong rotatePiece(ulong pieceBlocks)
 {
     ulong result = 0;
 
@@ -95,7 +95,7 @@ static ulong counterRotatePiece(ulong pieceBlocks)
             var idx = (cell * PIECE_WIDTH) + row;
             var cellValue = (pieceBlocks >> idx) & CELL_MASK;
             if (cellValue == 1)
-                result |= 1u << (((row + 1) * PIECE_WIDTH) + cell );
+                result |= 1u << (((row + 1) * PIECE_WIDTH) - (cell + 1));
         }
     }
 
