@@ -98,28 +98,4 @@ static ulong FlippyFlippyUppyDowny(GameConfig gameConfig, ulong pieceBlocks)
     return result;
 }
 
-static ulong FlippyFlippySideySidey(GameConfig gameConfig, ulong pieceBlocks)
-{
-    ulong result = 0b0;
-
-    for (int i = 0; i < gameConfig.PieceWidth; i++)
-    {
-        var rowShift = i * gameConfig.PieceWidth;
-        ulong insertValue = (BitHelper.ROW_MASK << rowShift) & pieceBlocks;
-
-        var mid = (gameConfig.PieceWidth - 1) / 2;
-        var magnatude = (i - mid) * 2;
-
-        if (magnatude < 0)
-            insertValue <<= Math.Abs(magnatude) * gameConfig.PieceWidth;
-        else if (magnatude > 0)
-            insertValue >>= magnatude * gameConfig.PieceWidth;
-
-        result |= insertValue;
-    }
-
-    return result;
-}
-
-
 static ulong InitBoard(GameConfig gameConfig) => 0u << (gameConfig.BoardHeight * gameConfig.BoardWidth);
