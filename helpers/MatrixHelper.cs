@@ -1,5 +1,17 @@
 public static class MatrixHelper
 {
+    public static ulong RotatePiece(GameConfig gameConfig, ulong pieceBlocks, int rotations = 1)
+    {
+        ulong result = pieceBlocks;
+        
+        for (int i = 0; i <= rotations; i++)
+        {
+            result = RotatePiece(gameConfig, result);
+        }
+
+        return result;
+    }
+    
     public static ulong RotatePiece(GameConfig gameConfig, ulong pieceBlocks)
     {
         ulong result = 0;
@@ -20,14 +32,12 @@ public static class MatrixHelper
 
     public static ulong NormalizePieceBlocks(GameConfig gameConfig, ulong pieceBlocks)
     {
-        ulong rowMask = 32u-1;
-
-        while((pieceBlocks & rowMask) == 0)
+        while((pieceBlocks & BitHelper.ROW_MASK) == 0)
             pieceBlocks >>= gameConfig.PieceHeight;
     
         pieceBlocks = RotatePiece(gameConfig, pieceBlocks);
 
-        while((pieceBlocks & rowMask) == 0)
+        while((pieceBlocks & BitHelper.ROW_MASK) == 0)
             pieceBlocks >>= gameConfig.PieceHeight;
         
         pieceBlocks = RotatePiece(gameConfig, pieceBlocks);
