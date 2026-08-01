@@ -54,12 +54,15 @@ public static class PrintHelper
     static ConsoleColor GetPieceConsoleColour(Piece piece) => piece switch
     {
         Piece.RED => ConsoleColor.Red,
-        Piece.GREEN => ConsoleColor.Green,
+        Piece.GREEN => ConsoleColor.DarkGreen,
         Piece.BLUE => ConsoleColor.Blue,
-        Piece.WHITE => ConsoleColor.White,
-        Piece.BLACK => ConsoleColor.Black,
         Piece.YELLOW => ConsoleColor.Yellow,
         Piece.PINK => ConsoleColor.Magenta,
+        Piece.INDIGO => ConsoleColor.DarkBlue,
+        Piece.PURPLE => ConsoleColor.DarkMagenta,
+        Piece.ORANGE => ConsoleColor.DarkYellow,
+        Piece.LIME => ConsoleColor.Green,
+        Piece.CYAN => ConsoleColor.White,
         _ => ConsoleColor.White,
     };
 }

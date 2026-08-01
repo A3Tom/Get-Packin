@@ -10,12 +10,16 @@ gameConfig.Board = InitBoard(gameConfig);
 
 Dictionary<Piece, ulong> _pieces = new()
 {
-    // { Piece.RED,        0b01111 },
-    // { Piece.BLUE,       0b00000_01010_01110_00000 },
-    // { Piece.GREEN,      0B00000_00010_00111_00000 },
-    { Piece.PINK,       0b00000_00001_01111_00000 },
-    // { Piece.YELLOW,     0b00000_00100_01111_00000 },
-    // { Piece.WHITE,      0b00000_00110_00011_00000 },
+    { Piece.INDIGO,         0b11111 },
+    { Piece.LIME,           0b00000_00001_01111 },
+    { Piece.PURPLE,         0b00000_01010_01110 },
+    { Piece.YELLOW,         0b00010_00010_00111 },
+    { Piece.RED,            0b00000_00100_01111 },
+    { Piece.ORANGE,         0b01100_00110_00010 },
+    { Piece.GREEN,          0b00110_00010_00011 },
+    { Piece.CYAN,           0b00111_00001_00001 },
+    { Piece.BLUE,           0b00110_01110_00000 },
+    { Piece.PINK,           0b00011_01110_00000 },
 };
 
 Dictionary<Piece, ulong[]> _piecePermutations = _pieces.ToDictionary(
@@ -42,10 +46,8 @@ static void PrintAllPiecePermutations(GameConfig gameConfig, Dictionary<Piece, u
 static ulong[] GetPiecePermutations(GameConfig gameConfig, ulong pieceBlocks)
 {
     var result = new List<ulong>();
-    result.AddRange(
-        GetPieceMirrorPermutations(gameConfig, pieceBlocks)
-        
-    );
+    result.AddRange(GetPieceRotationPermutations(gameConfig, pieceBlocks));
+    result.AddRange(GetPieceMirrorPermutations(gameConfig, pieceBlocks));
 
     return [.. result.ToHashSet()];
 }
@@ -63,13 +65,14 @@ static IEnumerable<ulong> GetPieceRotationPermutations(GameConfig gameConfig, ul
 
 static ulong[] GetPieceMirrorPermutations(GameConfig gameConfig, ulong pieceBlocks)
 {
-    ulong rw = 0b01100_00100_01111_00000_10010;
-
-    ulong resultUppyDowny = FlippyFlippyUppyDowny(gameConfig, rw);
-    ulong resultSideySidey = FlippyFlippyUppyDowny(gameConfig, MatrixHelper.RotatePiece(gameConfig, rw));
+    ulong resultUppyDowny = FlippyFlippyUppyDowny(gameConfig, pieceBlocks);
+    ulong resultSideySidey = FlippyFlippyUppyDowny(gameConfig, MatrixHelper.RotatePiece(gameConfig, pieceBlocks));
     resultSideySidey = MatrixHelper.RotatePiece(gameConfig, resultSideySidey, 2);
 
-    return [rw, resultUppyDowny, resultSideySidey];
+    return [
+        MatrixHelper.NormalizePieceBlocks(gameConfig, resultUppyDowny),
+        MatrixHelper.NormalizePieceBlocks(gameConfig, resultSideySidey)
+    ];
 }
 
 static ulong FlippyFlippyUppyDowny(GameConfig gameConfig, ulong pieceBlocks)
