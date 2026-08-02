@@ -51,6 +51,20 @@ public static class PrintHelper
         }
     }
 
+    public static void PrintAllPiecePermutations(GameConfig gameConfig, Dictionary<Piece, ulong[]> piecePermutations)
+    {
+        foreach (var piece in piecePermutations)
+        {
+            Console.WriteLine($"\n ~ {Enum.GetName(piece.Key)} ~ ");
+    
+            foreach (var perm in piece.Value)
+            {
+                Console.WriteLine();
+                PrintPiece(gameConfig, piece.Key, perm);
+            }
+        }
+    }
+
     static ConsoleColor GetPieceConsoleColour(Piece piece) => piece switch
     {
         Piece.RED => ConsoleColor.Red,

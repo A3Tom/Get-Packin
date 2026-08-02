@@ -27,21 +27,7 @@ Dictionary<Piece, ulong[]> _piecePermutations = _pieces.ToDictionary(
     v => GetPiecePermutations(gameConfig, v.Value)
 );
 
-PrintAllPiecePermutations(gameConfig, _piecePermutations);
-
-static void PrintAllPiecePermutations(GameConfig gameConfig, Dictionary<Piece, ulong[]> piecePermutations)
-{
-    foreach (var piece in piecePermutations)
-    {
-        Console.WriteLine($"\n ~ {Enum.GetName(piece.Key)} ~ ");
-
-        foreach (var perm in piece.Value)
-        {
-            Console.WriteLine();
-            PrintHelper.PrintPiece(gameConfig, piece.Key, perm);
-        }
-    }
-}
+PrintHelper.PrintAllPiecePermutations(gameConfig, _piecePermutations);
 
 static ulong[] GetPiecePermutations(GameConfig gameConfig, ulong pieceBlocks)
 {
@@ -65,37 +51,14 @@ static IEnumerable<ulong> GetPieceRotationPermutations(GameConfig gameConfig, ul
 
 static ulong[] GetPieceMirrorPermutations(GameConfig gameConfig, ulong pieceBlocks)
 {
-    ulong resultUppyDowny = FlippyFlippyUppyDowny(gameConfig, pieceBlocks);
-    ulong resultSideySidey = FlippyFlippyUppyDowny(gameConfig, MatrixHelper.RotatePiece(gameConfig, pieceBlocks));
+    ulong resultUppyDowny = MatrixHelper.FlippyFlippyUppyDowny(gameConfig, pieceBlocks);
+    ulong resultSideySidey = MatrixHelper.FlippyFlippyUppyDowny(gameConfig, MatrixHelper.RotatePiece(gameConfig, pieceBlocks));
     resultSideySidey = MatrixHelper.RotatePiece(gameConfig, resultSideySidey, 2);
 
     return [
         MatrixHelper.NormalizePieceBlocks(gameConfig, resultUppyDowny),
         MatrixHelper.NormalizePieceBlocks(gameConfig, resultSideySidey)
     ];
-}
-
-static ulong FlippyFlippyUppyDowny(GameConfig gameConfig, ulong pieceBlocks)
-{
-    ulong result = 0b0;
-
-    for (int i = 0; i < gameConfig.PieceHeight; i++)
-    {
-        var rowShift = i * gameConfig.PieceHeight;
-        ulong insertValue = (BitHelper.ROW_MASK << rowShift) & pieceBlocks;
-
-        var mid = (gameConfig.PieceHeight - 1) / 2;
-        var magnatude = (i - mid) * 2;
-
-        if (magnatude < 0)
-            insertValue <<= Math.Abs(magnatude) * gameConfig.PieceHeight;
-        else if (magnatude > 0)
-            insertValue >>= magnatude * gameConfig.PieceHeight;
-
-        result |= insertValue;
-    }
-
-    return result;
 }
 
 static ulong InitBoard(GameConfig gameConfig) => 0u << (gameConfig.BoardHeight * gameConfig.BoardWidth);
