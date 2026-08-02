@@ -30,17 +30,30 @@ Dictionary<Piece, ulong[]> _piecePermutations = _pieces.ToDictionary(
 ulong position = 1u;
 ulong board = 0u;
 
-for (int i = 0; i < 50; i++)
+foreach (var piecePerm in _piecePermutations)
 {
-    position <<= 1;
-    if (i == 16)
+    bool placed = false;
+    for (int p = 0; p < piecePerm.Value.Length; p++)
     {
-        var piece = _piecePermutations[Piece.ORANGE][0];
-        var placedPiece = piece << i;
-
-        Console.WriteLine($"Piece: {GetPieceWidth(gameConfig, piece)}x{GetPieceHeight(gameConfig, piece)} ({IsValidPiecePlacement(gameConfig, board, piece, i)})");
-        board |= placedPiece;
+        if (placed)
+            break;
+        
+        for (int i = 0; i < 50; i++)
+        {
+            position <<= 1;
+            var piece = piecePerm.Value[0];
+            var placedPiece = piece << i;
+            
+            if (IsValidPiecePlacement(gameConfig, board, piece, i))
+            {
+                Console.WriteLine($"Placed {Enum.GetName(piecePerm.Key)} at {i}");
+                board |= placedPiece;
+                placed = true;
+                break;
+            } 
+        }
     }
+    
 }
 Console.WriteLine();
 PrintHelper.PrintBoard(gameConfig, board);
@@ -50,34 +63,12 @@ static bool IsValidPiecePlacement(GameConfig gameConfig, ulong board, ulong piec
         return false;
 
     var colsRemaining = gameConfig.BoardWidth - (index % gameConfig.BoardWidth);
-    if (colsRemaining < GetPieceWidth(gameConfig, piece))
+    if (colsRemaining < MatrixHelper.GetPieceWidth(gameConfig, piece))
         return false;
 
     var rowsRemaining = gameConfig.BoardHeight - Math.Ceiling((double)index / gameConfig.BoardWidth);
-    if (rowsRemaining < GetPieceHeight(gameConfig, piece))
+    if (rowsRemaining < MatrixHelper.GetPieceHeight(gameConfig, piece))
         return false;
 
     return true;
-}
-
-static int GetPieceWidth(GameConfig gameConfig, ulong piece)
-{
-    for (int result = 0; result < gameConfig.BoardWidth; result++)
-    {
-        if ((piece & (gameConfig.BoardColumnMask << result)) == 0) 
-            return result;
-    }
-
-    return gameConfig.BoardHeight;
-}
-
-static int GetPieceHeight(GameConfig gameConfig, ulong piece)
-{
-    for (int result = 0; result < gameConfig.BoardHeight; result++)
-    {
-        if ((piece & (gameConfig.BoardRowMask << (result * gameConfig.BoardWidth))) == 0) 
-            return result;
-    }
-
-    return gameConfig.BoardHeight;
 }

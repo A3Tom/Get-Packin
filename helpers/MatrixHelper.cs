@@ -138,4 +138,26 @@ public static class MatrixHelper
         
         return assPiece;
     }
+    
+    public static int GetPieceWidth(GameConfig gameConfig, ulong piece)
+    {
+        for (int result = 0; result < gameConfig.BoardWidth; result++)
+        {
+            if ((piece & (gameConfig.BoardColumnMask << result)) == 0) 
+                return result;
+        }
+
+        return gameConfig.BoardHeight;
+    }
+
+    public static int GetPieceHeight(GameConfig gameConfig, ulong piece)
+    {
+        for (int result = 0; result < gameConfig.BoardHeight; result++)
+        {
+            if ((piece & (gameConfig.BoardRowMask << (result * gameConfig.BoardWidth))) == 0) 
+                return result;
+        }
+
+        return gameConfig.BoardHeight;
+    }
 }
