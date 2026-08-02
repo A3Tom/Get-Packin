@@ -29,34 +29,47 @@ Dictionary<Piece, ulong[]> _piecePermutations = _pieces.ToDictionary(
 
 ulong position = 1u;
 ulong board = 0u;
+ulong fullBoard = (ulong)(Math.Pow(2, 50) - 1);
 
-foreach (var piecePerm in _piecePermutations)
+for (int startingIdx = 0; startingIdx < 50; startingIdx++)
 {
-    bool placed = false;
-    for (int p = 0; p < piecePerm.Value.Length; p++)
+    foreach (var piecePerm in _piecePermutations)
     {
-        if (placed)
-            break;
-        
-        for (int i = 0; i < 50; i++)
+        bool placed = false;
+        for (int p = 0; p < piecePerm.Value.Length; p++)
         {
-            position <<= 1;
-            var piece = piecePerm.Value[0];
-            var placedPiece = piece << i;
-            
-            if (IsValidPiecePlacement(gameConfig, board, piece, i))
-            {
-                Console.WriteLine($"Placed {Enum.GetName(piecePerm.Key)} at {i}");
-                board |= placedPiece;
-                placed = true;
+            if (placed)
                 break;
-            } 
+            
+            bool isFirstPiece = piecePerm.Key == _piecePermutations.First().Key;
+            
+            for (int i = 0; i < 50; i++)
+            {
+                int pieceIdx = isFirstPiece ? startingIdx : i;
+
+                position <<= 1;
+                var piece = piecePerm.Value[0];
+                var placedPiece = piece << i;
+                
+                if (IsValidPiecePlacement(gameConfig, board, piece, pieceIdx))
+                {
+                    Console.WriteLine($"Placed {Enum.GetName(piecePerm.Key)} at {pieceIdx}");
+                    board |= placedPiece;
+                    placed = true;
+                    break;
+                } 
+            }
         }
     }
-    
+
+    PrintHelper.PrintBoard(gameConfig, board);
+
+    if ((board & fullBoard) == 1)
+        break;
+    else
+        board = 0u;
 }
 Console.WriteLine();
-PrintHelper.PrintBoard(gameConfig, board);
 
 static bool IsValidPiecePlacement(GameConfig gameConfig, ulong board, ulong piece, int index) { 
     if ((board & (piece << index)) != 0) 
