@@ -69,4 +69,37 @@ public static class MatrixHelper
 
         return pieceBlocks;
     }
+
+    public static ulong[] GetPiecePermutations(GameConfig gameConfig, ulong pieceBlocks)
+    {
+        var result = new List<ulong>();
+        result.AddRange(GetPieceRotationPermutations(gameConfig, pieceBlocks));
+        result.AddRange(GetPieceMirrorPermutations(gameConfig, pieceBlocks));
+
+        return [.. result.ToHashSet()];
+    }
+
+    public static IEnumerable<ulong> GetPieceRotationPermutations(GameConfig gameConfig, ulong pieceBlocks)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < i; j++)
+                pieceBlocks = RotatePiece(gameConfig, pieceBlocks);
+            
+            yield return NormalizePieceBlocks(gameConfig, pieceBlocks);
+        }
+    }
+
+    public static ulong[] GetPieceMirrorPermutations(GameConfig gameConfig, ulong pieceBlocks)
+    {
+        ulong resultUppyDowny = FlippyFlippyUppyDowny(gameConfig, pieceBlocks);
+        ulong resultSideySidey = FlippyFlippyUppyDowny(gameConfig, RotatePiece(gameConfig, pieceBlocks));
+        resultSideySidey = RotatePiece(gameConfig, resultSideySidey, 2);
+
+        return [
+            NormalizePieceBlocks(gameConfig, resultUppyDowny),
+            NormalizePieceBlocks(gameConfig, resultSideySidey)
+        ];
+    }
+
 }
