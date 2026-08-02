@@ -23,5 +23,61 @@ Dictionary<Piece, ulong> _pieces = new()
 Dictionary<Piece, ulong[]> _piecePermutations = _pieces.ToDictionary(
     x => x.Key,
     v => MatrixHelper.GetPiecePermutations(gameConfig, v.Value)
+            .Select(x => MatrixHelper.AssimilateToBoardDimensions(gameConfig, x))
+            .ToArray()
 );
 
+ulong position = 1u;
+ulong board = 0u;
+
+for (int i = 0; i < 50; i++)
+{
+    position <<= 1;
+    if (i == 16)
+    {
+        var piece = _piecePermutations[Piece.ORANGE][0];
+        var placedPiece = piece << i;
+
+        Console.WriteLine($"Piece: {GetPieceWidth(gameConfig, piece)}x{GetPieceHeight(gameConfig, piece)} ({IsValidPiecePlacement(gameConfig, board, piece, i)})");
+        board |= placedPiece;
+    }
+}
+Console.WriteLine();
+PrintHelper.PrintBoard(gameConfig, board);
+
+static bool IsValidPiecePlacement(GameConfig gameConfig, ulong board, ulong piece, int index) { 
+    if ((board & (piece << index)) != 0) 
+        return false;
+
+    var colsRemaining = gameConfig.BoardWidth - (index % gameConfig.BoardWidth);
+    if (colsRemaining < GetPieceWidth(gameConfig, piece))
+        return false;
+
+    var rowsRemaining = gameConfig.BoardHeight - Math.Ceiling((double)index / gameConfig.BoardWidth);
+    if (rowsRemaining < GetPieceHeight(gameConfig, piece))
+        return false;
+
+    return true;
+}
+
+static int GetPieceWidth(GameConfig gameConfig, ulong piece)
+{
+    for (int result = 0; result < gameConfig.BoardWidth; result++)
+    {
+        if ((piece & (gameConfig.BoardColumnMask << result)) == 0) 
+            return result;
+    }
+
+    return gameConfig.BoardHeight;
+}
+
+static int GetPieceHeight(GameConfig gameConfig, ulong piece)
+{
+    for (int result = 0; result < gameConfig.BoardHeight; result++)
+    {
+        if ((piece & (gameConfig.BoardRowMask << (result * gameConfig.BoardWidth))) == 0) 
+            return result;
+    }
+
+    return gameConfig.BoardHeight;
+}

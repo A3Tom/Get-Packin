@@ -29,6 +29,24 @@ public static class MatrixHelper
 
         return result;
     }
+    
+    public static ulong RotateAssPiece(GameConfig gameConfig, ulong pieceBlocks)
+    {
+        ulong result = 0;
+
+        for (int row = gameConfig.BoardHeight -1; row >= 0; row--)
+        {
+            for (int cell = 0; cell < gameConfig.BoardWidth; cell++)
+            {
+                var idx = (cell * gameConfig.BoardWidth) + row;
+                var cellValue = (pieceBlocks >> idx) & BitHelper.KENOBI;
+                if (cellValue == 1)
+                    result |= 1u << (((row + 1) * gameConfig.BoardWidth) - (cell + 1));
+            }
+        }
+
+        return result;
+    }
 
     public static ulong FlippyFlippyUppyDowny(GameConfig gameConfig, ulong pieceBlocks)
     {
@@ -102,4 +120,22 @@ public static class MatrixHelper
         ];
     }
 
+    public static ulong AssimilateToBoardDimensions(GameConfig gameConfig, ulong piece)
+    {
+        var columnsToAdd = gameConfig.BoardWidth - gameConfig.PieceWidth;
+        ulong assPiece = 0u;
+
+        for (int i = 0; i < gameConfig.PieceHeight; i++)
+        {
+            var buffer = piece & BitHelper.ROW_MASK << (i * gameConfig.PieceWidth);
+
+            if(buffer == 0)
+                break;
+
+            buffer <<= i * columnsToAdd;
+            assPiece |= buffer;
+        }
+        
+        return assPiece;
+    }
 }

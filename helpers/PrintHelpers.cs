@@ -3,7 +3,7 @@ public static class PrintHelper
     public const char EMPTY_SPACE = '·';
     public const char BLOCK = '█';
 
-    public static void PrintBoard(GameConfig gameConfig)
+    public static void PrintBoard(GameConfig gameConfig, ulong board)
     {
         for (int row = 0; row < gameConfig.BoardHeight; row++)
         {
@@ -12,7 +12,7 @@ public static class PrintHelper
             for(int cell = 0; cell < gameConfig.BoardWidth; cell++)
             {
                 var idx = (row * gameConfig.BoardWidth) + cell;
-                var hing = (gameConfig.Board >> idx) & BitHelper.KENOBI;
+                var hing = (board >> idx) & BitHelper.KENOBI;
                 var outputChar = hing == 1 ? BLOCK : EMPTY_SPACE;
                 Console.Write($"{outputChar} ");
             }
@@ -56,7 +56,7 @@ public static class PrintHelper
         foreach (var piece in piecePermutations)
         {
             Console.WriteLine($"\n ~ {Enum.GetName(piece.Key)} ~ ");
-    
+
             foreach (var perm in piece.Value)
             {
                 Console.WriteLine();
