@@ -10,6 +10,9 @@ public class GameConfig
     public ulong BoardColumnMask => BuidColumnMask(BoardWidth, BoardHeight);
     public ulong BoardRowMask => (ulong)(Math.Pow(2, BoardWidth) - 1);
     public ulong PieceColumnMask => BuidColumnMask(PieceWidth, PieceHeight);
+    public ulong PieceRowMask => (ulong)(Math.Pow(2, PieceWidth) - 1);
+
+    public ulong FullBoard => (ulong)(Math.Pow(2, BoardWidth * BoardHeight) - 1);
 
     public static ulong BuidColumnMask(int width, int height)
     {
