@@ -60,7 +60,7 @@ public static class PrintHelper
             foreach (var perm in piece.Value)
             {
                 Console.WriteLine();
-                PrintPiece(gameConfig, piece.Key, perm);
+                PrintBoard(gameConfig, perm);
             }
         }
     }

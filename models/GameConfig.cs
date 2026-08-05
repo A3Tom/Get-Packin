@@ -5,14 +5,15 @@ public class GameConfig
     public int PieceHeight { get; init; }
     public int PieceWidth { get; init; }
     
-    public ulong Board => 0u << (BoardHeight * BoardWidth);
 
     public ulong BoardColumnMask => BuidColumnMask(BoardWidth, BoardHeight);
     public ulong BoardRowMask => (ulong)(Math.Pow(2, BoardWidth) - 1);
     public ulong PieceColumnMask => BuidColumnMask(PieceWidth, PieceHeight);
     public ulong PieceRowMask => (ulong)(Math.Pow(2, PieceWidth) - 1);
 
-    public ulong FullBoard => (ulong)(Math.Pow(2, BoardWidth * BoardHeight) - 1);
+    public int BoardSquares => BoardHeight * BoardWidth;
+    public ulong Board => 0u << BoardSquares;
+    public ulong FullBoard => (ulong)(Math.Pow(2, BoardSquares) - 1);
 
     public static ulong BuidColumnMask(int width, int height)
     {
