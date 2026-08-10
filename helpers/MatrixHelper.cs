@@ -160,4 +160,29 @@ public static class MatrixHelper
 
         return gameConfig.BoardHeight;
     }
+
+    public static List<List<Tuple<Piece, ulong>>> GetCartesianProduct(Dictionary<Piece, ulong[]> piecePermutations)
+    {
+        var results = new List<List<Tuple<Piece, ulong>>>();
+        BacktrackCartesian(piecePermutations, 0, [], results);
+        return results;
+    }
+
+    public static void BacktrackCartesian(Dictionary<Piece, ulong[]> piecePermutations, int row, List<Tuple<Piece, ulong>> current, List<List<Tuple<Piece, ulong>>> results)
+    {
+        if (current.Count == piecePermutations.Count)
+        {
+            results.Add([.. current]);
+            return;
+        }
+
+        for (int i = 0; i < piecePermutations[(Piece)row].Length; i++)
+        {
+            current.Add(new ((Piece)row, piecePermutations[(Piece)row][i]));
+
+            BacktrackCartesian(piecePermutations, row + 1, current, results);
+
+            current.RemoveAt(current.Count - 1);
+        }
+    }
 }

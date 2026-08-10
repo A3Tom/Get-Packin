@@ -1,64 +1,87 @@
-﻿GameConfig gameConfig = GameHelper.BuildGameConfig();
+﻿using System.Collections.Concurrent;
 
-Solve(gameConfig);
-// var _pieces = GameHelper.BuildGamePieces();
-// var _piecePermutations = GameHelper.BuildPiecePermutationDictionary(gameConfig, _pieces);
+GameConfig gameConfig = GameHelper.BuildGameConfig();
 
-// ulong board = 0u;
+// Solve(gameConfig);
+var _pieces = GameHelper.BuildGamePieces();
+var _piecePermutations = GameHelper.BuildPiecePermutationDictionary(gameConfig, _pieces);
 
-// PrintHelper.PrintAllPiecePermutations(gameConfig, _piecePermutations);
+PrintHelper.PrintAllPiecePermutations(gameConfig, _piecePermutations);
 
-static List<List<PlacedPiece>> Solve(GameConfig gameConfig)
+var results = new ConcurrentBag<ConcurrentBag<PlacedPiece>>();
+var cartii = MatrixHelper.GetCartesianProduct(_piecePermutations)
+    .Select(x => x.ToDictionary(
+        k => k.Item1,
+        v => v.Item2
+    )
+);
+
+long permutationsSolved = 0;
+long total = cartii.Count();
+
+Parallel.ForEach(cartii, solveTask =>
 {
-    var _pieces = GameHelper.BuildGamePieces();
-    var _piecePermutations = GameHelper.BuildPiecePermutationDictionary(gameConfig, _pieces);
-    List<List<PlacedPiece>> results = [];
-    
-    Backtrack(
+    SolvePermutation(
         gameConfig,
-        _piecePermutations, 
-        new bool[_piecePermutations.Keys.Count], 
-        0u, 
-        [], 
+        solveTask,
+        new bool[solveTask.Count],
+        0u,
+        [],
         results
     );
 
-    return results;
-}
+    Interlocked.Increment(ref permutationsSolved);
 
-static void Backtrack(GameConfig gameConfig, Dictionary<Piece, ulong[]> piecePermutations, bool[] used, ulong board, List<PlacedPiece> current, List<List<PlacedPiece>> results)
+    Console.WriteLine($"Solved {permutationsSolved} | found {results.Count()}");
+});
+
+// var _workingPieces = GameHelper.BuildWorkingPieces()
+//     .ToDictionary(
+//         k => k.Key,
+//         x => MatrixHelper.AssimilateToBoardDimensions(gameConfig, x.Value)
+//     );
+
+// SolvePermutation(
+//     gameConfig, 
+//     _workingPieces, 
+//     new bool[_workingPieces.Count],
+//     0u,
+//     [],
+//     results);
+
+Console.WriteLine("Done");
+
+
+static void SolvePermutation(GameConfig gameConfig, Dictionary<Piece, ulong> pieces, bool[] used, ulong board, List<PlacedPiece> current, ConcurrentBag<ConcurrentBag<PlacedPiece>> results)
 {
-     if(board == gameConfig.FullBoard)
+    if(board == gameConfig.FullBoard)
     {
         results.Add([.. current]);
         return;
     }
 
-    for (int i = 0; i < piecePermutations.Keys.Count; i++)
+    for (int i = 0; i < pieces.Count; i++)
     {
-        for (int j = 0; j < piecePermutations[(Piece)i].Length; j++)
+        for (int boardIdx = 0; boardIdx < gameConfig.BoardSquares; boardIdx++)
         {
-            for (int boardIdx = 0; boardIdx < gameConfig.BoardSquares; boardIdx++)
-            {
-                if (used[i] || (board & (1u << boardIdx)) != 0)
-                    break;
+            if (used[i] || (board & (1u << boardIdx)) != 0)
+                break;
 
-                var placedPiece = piecePermutations[(Piece)i][j] << boardIdx;
-                
-                if (!GameHelper.IsValidPiecePlacement(gameConfig, board, piecePermutations[(Piece)i][j], boardIdx))
-                    continue;
-                
-                current.Add(new((Piece)i, placedPiece, boardIdx));
-                used[i] = true;
-                board |= placedPiece;
+            var placedPiece = pieces[(Piece)i] << boardIdx;
+            
+            if (!GameHelper.IsValidPiecePlacement(gameConfig, board, pieces[(Piece)i], boardIdx))
+                continue;
+            
+            current.Add(new((Piece)i, placedPiece, boardIdx));
+            used[i] = true;
+            board |= placedPiece;
 
-                Backtrack(gameConfig, piecePermutations, used, board, current, results);
+            SolvePermutation(gameConfig, pieces, used, board, current, results);
 
-                board &= ~placedPiece;
-                used[i] = false;
-                current.RemoveAt(current.Count - 1);
-            }
-        }   
+            board &= ~placedPiece;
+            used[i] = false;
+            current.RemoveAt(current.Count - 1);
+        }
     }
 }
 
