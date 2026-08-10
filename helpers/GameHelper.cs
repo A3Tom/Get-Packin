@@ -22,24 +22,6 @@ public static class GameHelper
         { Piece.PINK,           0b00011_01110_00000 },
     };
 
-    public static Dictionary<Piece, ulong> BuildWorkingPieces()
-    {
-        var result = new Dictionary<Piece, ulong>()
-        {
-            { Piece.RED,            0b00000_01111_00010 },
-            { Piece.GREEN,          0b00110_00010_00011 },
-            { Piece.BLUE,           0b00000_00011_00111 },
-            { Piece.YELLOW,         0b00111_00010_00010 },
-            { Piece.PINK,           0b00010_00011_00001_00001 },
-            { Piece.INDIGO,         0b11111 },
-            { Piece.PURPLE,         0b00000_11100_10100 },
-            { Piece.ORANGE,         0b00100_00110_00011 },
-            { Piece.LIME,           0b00000_01111_01000 },
-            { Piece.CYAN,           0b00100_00100_00111 },
-        };
-        return result;
-    }
-
     public static Dictionary<Piece, ulong[]> BuildPiecePermutationDictionary(GameConfig gameConfig, Dictionary<Piece, ulong> _pieces) => 
         _pieces.ToDictionary(
             x => x.Key,
