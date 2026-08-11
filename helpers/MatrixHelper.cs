@@ -122,6 +122,7 @@ public static class MatrixHelper
 
     public static ulong AssimilateToBoardDimensions(GameConfig gameConfig, ulong piece)
     {
+        piece = NormalizePieceBlocks(gameConfig, piece);
         var columnsToAdd = gameConfig.BoardWidth - gameConfig.PieceWidth;
         ulong assPiece = 0u;
 
