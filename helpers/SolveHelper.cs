@@ -1,38 +1,37 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 public static class SolveHelper
 {
-    public static void SolvePermutation(GameConfig gameConfig, Dictionary<Piece, ulong> pieces, bool[] used, ulong board, List<PlacedPiece> current, List<List<PlacedPiece>> results)
+    public static void SolveParallel(GameConfig gameConfig, List<Dictionary<Piece, ulong>> shortList, ConcurrentBag<List<PlacedPiece>> results, ConcurrentDictionary<long, double> timings, long permutationsSolved)
     {
-        if(board == gameConfig.FullBoard && !IsAlreadyFoundSolution(results, current))
+        _ = Parallel.ForEach(shortList, solveTask =>
         {
-            results.Add([.. current]);
-            return;
-        }
+            var permutationResults = new ConcurrentBag<List<PlacedPiece>>();
+            var sw = new Stopwatch();
+            sw.Start();
 
-        for (int i = 0; i < pieces.Count; i++)
-        {
-            for (int boardIdx = 0; boardIdx < gameConfig.BoardSquares; boardIdx++)
-            {
-                if (used[i] || (board & (1u << boardIdx)) != 0)
-                    break;
+            SolvePermutation(
+                gameConfig,
+                solveTask,
+                new bool[solveTask.Count],
+                0u,
+                [],
+                permutationResults
+            );
 
-                var placedPiece = pieces[(Piece)i] << boardIdx;
-                
-                if (!GameHelper.IsValidPiecePlacement(gameConfig, board, pieces[(Piece)i], boardIdx))
-                    continue;
-                
-                current.Add(new((Piece)i, placedPiece, boardIdx));
-                used[i] = true;
-                board |= placedPiece;
+            sw.Stop();
 
-                SolvePermutation(gameConfig, pieces, used, board, current, results);
+            foreach (var permResult in permutationResults)
+                results.Add(permResult);
 
-                board &= ~placedPiece;
-                used[i] = false;
-                current.RemoveAt(current.Count - 1);
-            }
-        }
+            Interlocked.Increment(ref permutationsSolved);
+
+            var elapsedTime = Math.Ceiling((double)sw.ElapsedMilliseconds);
+            timings.TryAdd(permutationsSolved, elapsedTime);
+            var avgSolveTime = timings.Average(x => x.Value);
+            Console.WriteLine($"\rSolved {permutationsSolved} | found {permutationResults.Count()} (total: {results.Count()}) # {elapsedTime:N0}ms ({avgSolveTime:N2}ms)");
+        });
     }
 
     public static void SolvePermutation(GameConfig gameConfig, Dictionary<Piece, ulong> pieces, bool[] used, ulong board, List<PlacedPiece> current, ConcurrentBag<List<PlacedPiece>> results)
@@ -72,5 +71,4 @@ public static class SolveHelper
         foundSolutions.Any(existingSolution => 
             PrintHelper.BuildSolutionHash(existingSolution) == PrintHelper.BuildSolutionHash([.. newSolution.OrderBy(x => x.Index)])
         );
-
 }

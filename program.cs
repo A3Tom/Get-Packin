@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 
 var gameConfig = GameHelper.BuildGameConfig();
 var knownSolvablePiecePermutations = KnownPermutationData.BuildSolvablePieces(gameConfig);
@@ -21,40 +20,7 @@ long total = _pieceCartesions.Count();
 
 Console.WriteLine($"Total to solve: {total:N0}");
 
-SolveParallel(gameConfig, shortList, results, timings, permutationsSolved);
+SolveHelper.SolveParallel(gameConfig, shortList, results, timings, permutationsSolved);
 
 PrintHelper.PrintSolutions(gameConfig, results);
 Console.WriteLine("Done");
-
-
-
-static void SolveParallel(GameConfig gameConfig, List<Dictionary<Piece, ulong>> shortList, ConcurrentBag<List<PlacedPiece>> results, ConcurrentDictionary<long, double> timings, long permutationsSolved)
-{
-    _ = Parallel.ForEach(shortList, solveTask =>
-    {
-        var permutationResults = new ConcurrentBag<List<PlacedPiece>>();
-        var sw = new Stopwatch();
-        sw.Start();
-
-        SolveHelper.SolvePermutation(
-            gameConfig,
-            solveTask,
-            new bool[solveTask.Count],
-            0u,
-            [],
-            permutationResults
-        );
-
-        sw.Stop();
-
-        foreach (var permResult in permutationResults)
-            results.Add(permResult);
-
-        Interlocked.Increment(ref permutationsSolved);
-
-        var elapsedTime = Math.Ceiling((double)sw.ElapsedMilliseconds);
-        timings.TryAdd(permutationsSolved, elapsedTime);
-        var avgSolveTime = timings.Average(x => x.Value);
-        Console.WriteLine($"\rSolved {permutationsSolved} | found {permutationResults.Count()} (total: {results.Count()}) # {elapsedTime:N0}ms ({avgSolveTime:N2}ms)");
-    });
-}
