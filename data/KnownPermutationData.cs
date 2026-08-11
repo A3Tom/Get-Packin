@@ -1,28 +1,3 @@
-using System.Collections.Concurrent;
-using Xunit;
-
-public class SolvePermutationTests
-{
-    [Fact]
-    public void SolvePermutation_ShouldCorrectlySolve_WhenGivenAKnownWorkingPiece()
-    {
-        var gameConfig = GameHelper.BuildGameConfig();
-        var results = new ConcurrentBag<ConcurrentBag<PlacedPiece>>();
-        var pieces = KnownPermutationData.BuildSolvablePieces(gameConfig);
-        var expectedSolves = 1;
-
-        // SolveHelper.SolvePermutation(
-        //     gameConfig, 
-        //     pieces,
-        //     new bool[pieces.Count()],
-        //     0u,
-        //     [],
-        //     results);
-
-        Assert.Equal(results.Count(), expectedSolves);
-    }
-}
-
 public class KnownPermutationData
 {
     public static List<Dictionary<Piece, ulong>> BuildSolvablePieces(GameConfig gameConfig)
@@ -54,21 +29,27 @@ public class KnownPermutationData
             { Piece.LIME,           0b00000_01111_01000 },
             { Piece.CYAN,           0b00111_00001_00001 },
         };
+
+        var solvablePieces_3 = new Dictionary<Piece, ulong>()
+        {
+            { Piece.RED,            0b00010_01111 },
+            { Piece.GREEN,          0b00001_00111_00100 },
+            { Piece.BLUE,           0b00111_00011 },
+            { Piece.YELLOW,         0b00010_00010_00111 },
+            { Piece.PINK,           0b00001_00011_00010_00010 },
+            { Piece.INDIGO,         0b00001_00001_00001_00001_00001 },
+            { Piece.PURPLE,         0b00111_00101 },
+            { Piece.ORANGE,         0b00001_00011_00110 },
+            { Piece.LIME,           0b01000_01111 },
+            { Piece.CYAN,           0b00111_00001_00001 },
+        };
         
         List<Dictionary<Piece, ulong>> result = [
             solvablePieces_1,
-            solvablePieces_2
+            solvablePieces_2,
+            solvablePieces_3,
         ];
 
         return [.. result.Select(x => x.ToAssPiece(gameConfig))];
     }
-}
-
-public static class DictionaryExtensions
-{
-    public static Dictionary<Piece, ulong> ToAssPiece(this Dictionary<Piece, ulong>? source, GameConfig gameConfig) => 
-    source!.ToDictionary(
-        k => k.Key,
-        v => MatrixHelper.AssimilateToBoardDimensions(gameConfig, v.Value)
-    );
 }
