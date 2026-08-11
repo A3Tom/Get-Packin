@@ -32,6 +32,7 @@ static void SolveParallel(GameConfig gameConfig, List<Dictionary<Piece, ulong>> 
 {
     _ = Parallel.ForEach(shortList, solveTask =>
     {
+        var permutationResults = new ConcurrentBag<List<PlacedPiece>>();
         var sw = new Stopwatch();
         sw.Start();
 
@@ -41,16 +42,19 @@ static void SolveParallel(GameConfig gameConfig, List<Dictionary<Piece, ulong>> 
             new bool[solveTask.Count],
             0u,
             [],
-            results
+            permutationResults
         );
 
         sw.Stop();
+
+        foreach (var permResult in permutationResults)
+            results.Add(permResult);
 
         Interlocked.Increment(ref permutationsSolved);
 
         var elapsedTime = Math.Ceiling((double)sw.ElapsedMilliseconds);
         timings.TryAdd(permutationsSolved, elapsedTime);
         var avgSolveTime = timings.Average(x => x.Value);
-        Console.WriteLine($"\rSolved {permutationsSolved} | found {results.Count()} # {elapsedTime:N0}ms ({avgSolveTime:N2}ms)");
+        Console.WriteLine($"\rSolved {permutationsSolved} | found {permutationResults.Count()} (total: {results.Count()}) # {elapsedTime:N0}ms ({avgSolveTime:N2}ms)");
     });
 }
